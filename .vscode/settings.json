@@ -1,0 +1,6 @@
+{
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "java.import.gradle.wrapper.enabled": true,
+  "java.project.explorer.showNonJavaResources": true,
+  "gradle.nestedProjects": true
+}

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "profileId": "meu-servidor",
+  "name": "Meu servidor Forge 1.20.1",
+  "minecraftVersion": "1.20.1",
+  "loader": "forge",
+  "manifestVersion": "1",
+  "generatedAt": "2026-09-13T21:00:00Z",
+  "allowedClientMods": [
+    "cuscuz_sync",
+    "jei"
+  ],
+  "mods": [
+    {
+      "modId": "exemplo_modrinth",
+      "name": "Exemplo da Modrinth",
+      "version": "1.0.0",
+      "required": true,
+      "environment": "BOTH",
+      "platform": "MODRINTH",
+      "projectId": "ID_CANONICO_DO_PROJETO",
+      "versionId": "ID_EXATO_DA_VERSAO",
+      "fileId": 0,
+      "fileName": "",
+      "size": 0,
+      "sha1": "",
+      "sha512": "",
+      "downloadUrl": ""
+    },
+    {
+      "modId": "exemplo_curseforge",
+      "name": "Exemplo do CurseForge",
+      "version": "2.0.0",
+      "required": true,
+      "environment": "BOTH",
+      "platform": "CURSEFORGE",
+      "projectId": "123456",
+      "versionId": "",
+      "fileId": 9876543,
+      "fileName": "",
+      "size": 0,
+      "sha1": "",
+      "sha512": "",
+      "downloadUrl": ""
+    }
+  ]
+}

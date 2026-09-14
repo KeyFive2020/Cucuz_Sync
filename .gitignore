@@ -1,0 +1,14 @@
+.gradle-user-home/
+.idea/
+.vscode/*.log
+dist/
+**/.gradle/
+**/build/
+**/run/
+**/run-data/
+**/*.launch
+**/.classpath
+**/.project
+**/.settings/
+*.log
+*.log.gz
