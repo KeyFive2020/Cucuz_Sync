@@ -22,14 +22,6 @@ public final class ManifestHttpServer {
     private ManifestHttpServer() {
     }
 
-    public static synchronized void start(int minecraftPort) {
-        try {
-            start(minecraftPort, ServerManifestRepository.loadOrCreate());
-        } catch (IOException | ManifestException exception) {
-            LOGGER.error("Não foi possível preparar o endpoint do Cuscuz Sync.", exception);
-        }
-    }
-
     public static synchronized void start(int minecraftPort, byte[] manifest) {
         if (server != null || !Boolean.parseBoolean(System.getProperty("cuscuzSync.httpEnabled", "true"))) {
             return;
@@ -63,8 +55,8 @@ public final class ManifestHttpServer {
         }
     }
 
-    public static synchronized void reload() throws IOException, ManifestException {
-        manifestBytes = ServerManifestRepository.loadOrCreate();
+    public static synchronized void update(byte[] manifest) {
+        manifestBytes = manifest.clone();
     }
 
     private static void serveManifest(HttpExchange exchange) throws IOException {

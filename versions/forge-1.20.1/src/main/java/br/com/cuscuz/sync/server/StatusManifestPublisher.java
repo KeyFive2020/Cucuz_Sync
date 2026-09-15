@@ -16,12 +16,7 @@ public final class StatusManifestPublisher {
     private StatusManifestPublisher() {
     }
 
-    public static synchronized void reload() throws IOException, ManifestException {
-        publish(ServerManifestRepository.loadOrCreate());
-    }
-
     static synchronized void publish(byte[] manifest) throws IOException {
-        statusJson = null;
         String payload = StatusManifestCodec.encode(manifest);
         JsonObject root = new JsonObject();
         root.addProperty(StatusManifestCodec.JSON_FIELD, payload);

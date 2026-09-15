@@ -52,7 +52,7 @@ final class DownloadService {
         HttpRequest request = HttpRequest.newBuilder(artifact.uri())
                 .timeout(Duration.ofMinutes(3))
                 .header("Accept", "application/java-archive, application/octet-stream")
-                .header("User-Agent", "CuscuzSync/0.1.0 (Minecraft 1.20.1; Forge)")
+                .header("User-Agent", "CuscuzSync/0.3.0 (Minecraft 1.20.1; Forge)")
                 .GET()
                 .build();
         HttpResponse<InputStream> response = HTTP.send(request, HttpResponse.BodyHandlers.ofInputStream());
@@ -94,7 +94,7 @@ final class DownloadService {
         HttpRequest request = HttpRequest.newBuilder(uri)
                 .timeout(Duration.ofSeconds(20))
                 .header("Accept", "application/json")
-                .header("User-Agent", "CuscuzSync/0.1.0 (Minecraft 1.20.1; Forge)")
+                .header("User-Agent", "CuscuzSync/0.3.0 (Minecraft 1.20.1; Forge)")
                 .GET()
                 .build();
         HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());
@@ -109,16 +109,9 @@ final class DownloadService {
         if (files == null || files.isEmpty()) {
             throw new IOException("A versão Modrinth não contém arquivos.");
         }
-        JsonObject selected = null;
-        for (JsonElement element : files) {
-            JsonObject candidate = element.getAsJsonObject();
-            if (candidate.has("primary") && candidate.get("primary").getAsBoolean()) {
-                selected = candidate;
-                break;
-            }
-        }
+        JsonObject selected = selectExactFile(files, mod);
         if (selected == null) {
-            selected = files.get(0).getAsJsonObject();
+            throw new IOException("A versão Modrinth não contém o arquivo exato declarado para " + mod.modId + '.');
         }
         String fileName = selected.get("filename").getAsString();
         if (mod.fileName != null && !mod.fileName.isBlank() && !mod.fileName.equals(fileName)) {
@@ -136,6 +129,31 @@ final class DownloadService {
         URI downloadUri = URI.create(selected.get("url").getAsString());
         validateHost(downloadUri, MODRINTH_CDN, "Modrinth");
         return new RemoteArtifact(fileName, downloadUri, size, sha1, sha512);
+    }
+
+    static JsonObject selectExactFile(JsonArray files, ManifestMod mod) {
+        for (JsonElement element : files) {
+            JsonObject candidate = element.getAsJsonObject();
+            JsonObject candidateHashes = candidate.getAsJsonObject("hashes");
+            boolean sha1Matches = candidateHashes != null && candidateHashes.has("sha1")
+                    && mod.sha1 != null && !mod.sha1.isBlank()
+                    && mod.sha1.equalsIgnoreCase(candidateHashes.get("sha1").getAsString());
+            boolean sha512Matches = candidateHashes != null && candidateHashes.has("sha512")
+                    && mod.sha512 != null && !mod.sha512.isBlank()
+                    && mod.sha512.equalsIgnoreCase(candidateHashes.get("sha512").getAsString());
+            if (sha1Matches || sha512Matches) {
+                return candidate;
+            }
+        }
+        if (mod.fileName != null && !mod.fileName.isBlank()) {
+            for (JsonElement element : files) {
+                JsonObject candidate = element.getAsJsonObject();
+                if (mod.fileName.equals(candidate.get("filename").getAsString())) {
+                    return candidate;
+                }
+            }
+        }
+        return null;
     }
 
     private static RemoteArtifact resolveCurseForge(ManifestMod mod) throws IOException {

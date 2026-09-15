@@ -119,7 +119,7 @@ O servidor não conseguirá mapear todos os JARs para CurseForge/Modrinth apenas
 7. Validar que cada entrada tem arquivo exato e origem permitida.
 8. Gerar, canonicalizar e assinar o manifesto.
 
-O manifesto publicado não será alterado automaticamente a cada atualização disponível. O administrador deverá gerar uma nova revisão e poderá revisar o diff antes de publicá-la.
+O manifesto não escolhe automaticamente versões mais novas. Ele é reconstruído a cada cinco minutos a partir dos JARs exatos já ativos no servidor, substituindo a lista anterior e mantendo políticas administrativas compatíveis.
 
 ## Cache
 

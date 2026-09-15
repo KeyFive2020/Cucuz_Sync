@@ -16,8 +16,10 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public final class SyncInstaller {
@@ -44,7 +46,8 @@ public final class SyncInstaller {
 
         List<Operation> operations = new ArrayList<>();
         Set<Path> quarantinedSources = new HashSet<>();
-        Set<Path> installTargets = new HashSet<>();
+        Map<Path, String> installTargets = new HashMap<>();
+        Map<String, Path> downloadedArtifacts = new HashMap<>();
         for (PlanAction action : plan.actions()) {
             if (action.type() == PlanAction.Type.QUARANTINE || action.type() == PlanAction.Type.UPDATE) {
                 Path source = requireRegularModFile(action.installed().filePath(), modsDirectory);
@@ -54,12 +57,22 @@ public final class SyncInstaller {
                 }
             }
             if (action.type() == PlanAction.Type.INSTALL || action.type() == PlanAction.Type.UPDATE) {
-                Path downloaded = DownloadService.download(action.target(), staging);
-                Path target = modsDirectory.resolve(downloaded.getFileName()).toAbsolutePath().normalize();
-                if (!target.getParent().equals(modsDirectory) || !installTargets.add(target)) {
-                    throw new IOException("Dois mods tentaram usar o mesmo nome de arquivo: " + downloaded.getFileName());
+                String artifactKey = artifactKey(action);
+                Path downloaded = downloadedArtifacts.get(artifactKey);
+                if (downloaded == null) {
+                    downloaded = DownloadService.download(action.target(), staging);
+                    downloadedArtifacts.put(artifactKey, downloaded);
                 }
-                operations.add(new Operation("INSTALL", downloaded.toString(), target.toString(), action.modId()));
+                Path target = modsDirectory.resolve(downloaded.getFileName()).toAbsolutePath().normalize();
+                if (!target.getParent().equals(modsDirectory)) {
+                    throw new IOException("Destino de instalação inválido: " + downloaded.getFileName());
+                }
+                String previousArtifact = installTargets.putIfAbsent(target, artifactKey);
+                if (previousArtifact == null) {
+                    operations.add(new Operation("INSTALL", downloaded.toString(), target.toString(), action.modId()));
+                } else if (!previousArtifact.equals(artifactKey)) {
+                    throw new IOException("Dois arquivos diferentes tentaram usar o mesmo nome: " + downloaded.getFileName());
+                }
             }
         }
 
@@ -86,6 +99,17 @@ public final class SyncInstaller {
     private static Path uniqueTarget(Path directory, String fileName, int suffix) {
         Path direct = directory.resolve(fileName);
         return Files.exists(direct) ? directory.resolve(suffix + "-" + fileName) : direct;
+    }
+
+    private static String artifactKey(PlanAction action) {
+        if (action.target().sha1 != null && !action.target().sha1.isBlank()) {
+            return "sha1:" + action.target().sha1.toLowerCase(java.util.Locale.ROOT);
+        }
+        if (action.target().sha512 != null && !action.target().sha512.isBlank()) {
+            return "sha512:" + action.target().sha512.toLowerCase(java.util.Locale.ROOT);
+        }
+        return action.target().platform + ":" + action.target().projectId + ':'
+                + action.target().versionId + ':' + action.target().fileId;
     }
 
     private static void copyHelper(Path target) throws IOException {

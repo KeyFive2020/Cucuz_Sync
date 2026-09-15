@@ -14,7 +14,10 @@ Ele já realiza:
 - comparação entre cliente e servidor;
 - tela paginada mostrando todos os mods que seriam instalados, atualizados ou movidos;
 - consentimento explícito antes de qualquer mudança;
-- resolução de versões pela API pública da Modrinth;
+- descoberta do JAR exato pela API pública da Modrinth usando SHA-1;
+- fallback de descoberta no CurseForge usando fingerprint Murmur2 quando uma chave de API está configurada;
+- manifesto reconstruído e republicado a cada cinco minutos;
+- JARs separados para cliente e servidor;
 - downloads somente de CDNs HTTPS permitidas da Modrinth e CurseForge;
 - validação de tamanho e hashes SHA-1/SHA-512;
 - staging dos downloads e quarentena recuperável dos extras;
@@ -27,7 +30,7 @@ Na primeira inicialização, o servidor cria:
 
 `config/cuscuz-sync/server-manifest.json`
 
-O arquivo lista automaticamente os mods carregados, inicialmente com `platform: NONE`. O administrador precisa informar a origem verificável de cada mod que será gerenciado. Há um modelo comentado pelo próprio formato em:
+O arquivo é reconstruído com os mods ativos. Para cada JAR novo ou alterado, o servidor procura primeiro o arquivo exato na Modrinth pelo SHA-1 e, se não encontrar, tenta o CurseForge pelo fingerprint Murmur2. Entradas antigas deixam de existir na próxima reconstrução. Há um modelo do formato em:
 
 `versions/forge-1.20.1/config-examples/server-manifest.example.json`
 
@@ -43,16 +46,17 @@ Se a porta ou URL pública for diferente da convenção, o cliente cria `.cuscuz
 
 ## Modrinth
 
-Informe o ID canônico do projeto e o ID exato da versão. O cliente consulta a API pública, confirma que a versão pertence ao projeto, escolhe o arquivo primário e usa os hashes oficiais fornecidos pela plataforma.
+Não exige configuração. O servidor consulta a API pública pelo SHA-1, confirma Forge 1.20.1 e registra o arquivo exato correspondente ao hash, mesmo quando a versão possui vários arquivos.
 
 ## CurseForge
 
-Como a API oficial exige chave, o cliente não recebe nem armazena segredo algum. Defina `CURSEFORGE_API_KEY` somente no processo do servidor: o servidor resolverá em memória o nome, tamanho, SHA-1 e URL oficial a partir de `projectId` e `fileId`. O arquivo de configuração e o manifesto não armazenam a chave. Como alternativa, o administrador pode preencher esses metadados previamente. O cliente aceita apenas `edge.forgecdn.net` e `mediafilez.forgecdn.net` em HTTPS.
+Como a API oficial exige chave, o cliente não recebe nem armazena segredo algum. Defina `CURSEFORGE_API_KEY`, a propriedade Java `cuscuzSync.curseForgeApiKey` ou o campo de servidor em `config/cuscuz-sync/server-settings.json`. O servidor calcula o fingerprint do JAR e consulta o arquivo exato. O cliente baixa somente de hosts HTTPS oficiais permitidos.
 
 ## Limitações conhecidas deste marco
 
 - O manifesto ainda não possui assinatura criptográfica. A superfície de download já é limitada às plataformas oficiais e todo download é verificado, mas assinatura e confiança por servidor continuam na próxima fase.
-- A chave CurseForge precisa ser provisionada manualmente no ambiente do servidor e ter acesso válido à API.
+- A chave CurseForge precisa ser provisionada no servidor e ter acesso válido à API; sem ela, Modrinth continua funcionando normalmente.
+- Forge não carrega nem descarrega JARs em tempo de execução. Colocar ou remover um arquivo em `mods` exige reiniciar o servidor; depois do reinício, o manifesto é reconstruído e continua sendo republicado a cada cinco minutos.
 - Manifestos grandes demais para o limite do status ping ainda exigem endpoint HTTP ou hospedagem externa.
 - Proxies que recriam o ping (por exemplo, algumas configurações de Velocity/Bungee) podem remover o marcador ou a resposta. Nesses casos, use um `override` HTTPS; proxy TCP transparente funciona normalmente.
 - `enable-status=false` desativa também o transporte pela porta do Minecraft.

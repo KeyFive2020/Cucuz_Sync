@@ -47,6 +47,23 @@ class SyncPlannerTest {
         assertEquals(1, plan.count(PlanAction.Type.BLOCKED));
     }
 
+    @Test
+    void updatesSameVersionWhenArtifactHashDiffers() {
+        SyncManifest manifest = new SyncManifest();
+        ManifestMod target = modrinth("changed", "1.0.0");
+        target.sha1 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        manifest.mods.add(target);
+
+        InstalledMod installed = new InstalledMod(
+                "changed", "changed", "1.0.0", Path.of("mods", "changed.jar"), false,
+                "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", ""
+        );
+
+        var plan = SyncPlanner.compare(manifest, List.of(installed));
+
+        assertEquals(1, plan.count(PlanAction.Type.UPDATE));
+    }
+
     private static ManifestMod modrinth(String id, String version) {
         ManifestMod mod = new ManifestMod();
         mod.modId = id;

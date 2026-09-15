@@ -4,7 +4,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-Start-Sleep -Seconds 4
+Start-Sleep -Seconds 2
 
 function Get-NormalizedPath([string]$Path) {
     return [System.IO.Path]::GetFullPath($Path)
@@ -17,6 +17,24 @@ function Assert-ChildPath([string]$Path, [string]$Parent) {
         throw "Caminho fora da área permitida: $normalizedPath"
     }
     return $normalizedPath
+}
+
+function Move-WithRetry([string]$Source, [string]$Target) {
+    if (-not (Test-Path -LiteralPath $Source)) {
+        throw "Arquivo de origem ausente: $Source"
+    }
+    $deadline = [DateTime]::UtcNow.AddSeconds(60)
+    while ($true) {
+        try {
+            Move-Item -LiteralPath $Source -Destination $Target -Force
+            return
+        } catch {
+            if ([DateTime]::UtcNow -ge $deadline) {
+                throw
+            }
+            Start-Sleep -Seconds 1
+        }
+    }
 }
 
 try {
@@ -46,11 +64,9 @@ try {
         if ($kind -eq 'INSTALL' -and (Test-Path -LiteralPath $target)) {
             $backupDirectory = Join-Path $quarantineRoot ('backup-' + [string]$plan.createdAt)
             New-Item -ItemType Directory -Path $backupDirectory -Force | Out-Null
-            Move-Item -LiteralPath $target -Destination (Join-Path $backupDirectory ([System.IO.Path]::GetFileName($target))) -Force
+            Move-WithRetry $target (Join-Path $backupDirectory ([System.IO.Path]::GetFileName($target)))
         }
-        if (Test-Path -LiteralPath $source) {
-            Move-Item -LiteralPath $source -Destination $target -Force
-        }
+        Move-WithRetry $source $target
     }
 
     New-Item -ItemType Directory -Path $historyRoot -Force | Out-Null

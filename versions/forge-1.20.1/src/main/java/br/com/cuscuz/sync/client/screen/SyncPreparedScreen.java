@@ -18,7 +18,7 @@ public final class SyncPreparedScreen extends Screen {
     @Override
     protected void init() {
         int y = height / 2 + 44;
-        addRenderableWidget(Button.builder(Component.literal("Fechar o jogo e aplicar"), button -> minecraft.stop())
+        addRenderableWidget(Button.builder(Component.literal("Fechar e instalar agora"), button -> minecraft.stop())
                 .bounds(width / 2 - 102, y, 150, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Aplicar depois"), button -> minecraft.setScreen(parent))
                 .bounds(width / 2 + 52, y, 100, 20).build());

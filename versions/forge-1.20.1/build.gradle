@@ -86,7 +86,7 @@ minecraft {
         client {
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             property 'forge.enabledGameTestNamespaces', mod_id
-            args '--mixin', 'cuscuz_sync.mixins.json'
+            args '--mixin', 'cuscuz_sync.client.mixins.json'
             if (project.hasProperty('cuscuzSyncConnectionSmoke')) {
                 // Forces the vanilla quick-play path to load ConnectScreen and therefore
                 // validates the pre-connect mixin without requiring manual menu interaction.
@@ -96,7 +96,7 @@ minecraft {
 
         server {
             property 'forge.enabledGameTestNamespaces', mod_id
-            args '--mixin', 'cuscuz_sync.mixins.json'
+            args '--mixin', 'cuscuz_sync.server.mixins.json'
             args '--nogui'
         }
 
@@ -105,7 +105,7 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', mod_id
-            args '--mixin', 'cuscuz_sync.mixins.json'
+            args '--mixin', 'cuscuz_sync.server.mixins.json'
         }
 
         data {
@@ -177,24 +177,60 @@ tasks.named('processResources', ProcessResources).configure {
     }
 }
 
-// Example for how to get properties into the manifest for reading at runtime.
-tasks.named('jar', Jar).configure {
-    manifest {
-        attributes([
-                'Specification-Title'     : mod_id,
-                'Specification-Vendor'    : mod_authors,
-                'Specification-Version'   : '1', // We are version 1 of ourselves
-                'Implementation-Title'    : project.name,
-                'Implementation-Version'  : project.jar.archiveVersion,
-                'Implementation-Vendor'   : mod_authors,
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'MixinConfigs'             : 'cuscuz_sync.mixins.json'
-        ])
-    }
+def variantManifest = { String mixinConfig -> [
+        'Specification-Title'      : mod_id,
+        'Specification-Vendor'     : mod_authors,
+        'Specification-Version'    : '1',
+        'Implementation-Title'     : project.name,
+        'Implementation-Version'   : project.version,
+        'Implementation-Vendor'    : mod_authors,
+        'Implementation-Timestamp' : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+        'MixinConfigs'              : mixinConfig
+] }
 
-    // This is the preferred method to reobfuscate your jar file
-    finalizedBy 'reobfJar'
+tasks.named('jar', Jar).configure { enabled = false }
+tasks.matching { it.name == 'reobfJar' }.configureEach { enabled = false }
+
+def clientJarTask = tasks.register('clientJar', Jar) {
+    dependsOn tasks.named('classes')
+    archiveBaseName.set(mod_id)
+    archiveVersion.set(project.version.toString())
+    archiveClassifier.set('client')
+    from(sourceSets.main.output) {
+        exclude 'br/com/cuscuz/sync/server/**'
+        exclude 'br/com/cuscuz/sync/mixin/ServerHandshakePacketListenerImplMixin.class'
+        exclude 'cuscuz_sync.server.mixins.json'
+        exclude 'cuscuz_sync.mixins.json'
+    }
+    manifest { attributes(variantManifest('cuscuz_sync.client.mixins.json')) }
 }
+
+def serverJarTask = tasks.register('serverJar', Jar) {
+    dependsOn tasks.named('classes')
+    archiveBaseName.set(mod_id)
+    archiveVersion.set(project.version.toString())
+    archiveClassifier.set('server')
+    from(sourceSets.main.output) {
+        exclude 'br/com/cuscuz/sync/client/**'
+        exclude 'br/com/cuscuz/sync/install/**'
+        exclude 'br/com/cuscuz/sync/inventory/**'
+        exclude 'br/com/cuscuz/sync/plan/**'
+        exclude 'br/com/cuscuz/sync/mixin/ConnectScreenMixin.class'
+        exclude 'assets/cuscuz_sync/**'
+        exclude 'cuscuz_sync.client.mixins.json'
+        exclude 'cuscuz_sync.mixins.json'
+    }
+    manifest { attributes(variantManifest('cuscuz_sync.server.mixins.json')) }
+}
+
+reobf {
+    clientJar {}
+    serverJar {}
+}
+
+clientJarTask.configure { finalizedBy 'reobfClientJar' }
+serverJarTask.configure { finalizedBy 'reobfServerJar' }
+tasks.named('assemble').configure { dependsOn clientJarTask, serverJarTask }
 
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing:
 // tasks.named('publish').configure {
@@ -205,7 +241,8 @@ tasks.named('jar', Jar).configure {
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            artifact jar
+            artifact clientJarTask
+            artifact serverJarTask
         }
     }
     repositories {

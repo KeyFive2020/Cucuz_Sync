@@ -2,7 +2,7 @@
 
 ## Visão geral
 
-O mod terá duas funções no mesmo JAR: componente de servidor e componente de cliente. Código que toca telas ou arquivos locais ficará isolado no lado cliente para não quebrar servidores dedicados.
+O mod usa dois JARs com o mesmo mod ID e protocolo: um componente de servidor e um componente de cliente. Código que toca telas ou arquivos locais existe somente no JAR cliente; endpoints e atualização do manifesto existem somente no JAR servidor.
 
 ### Componentes do servidor
 

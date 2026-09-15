@@ -31,14 +31,16 @@ public final class SyncReviewScreen extends Screen {
     @Override
     protected void init() {
         int y = height - 28;
+        long downloads = plan.count(PlanAction.Type.INSTALL) + plan.count(PlanAction.Type.UPDATE);
         Button apply = Button.builder(Component.literal(plan.hasBlockedActions()
-                                ? "Há itens sem download" : "Permitir e preparar"),
+                                ? plan.count(PlanAction.Type.BLOCKED) + " mods sem fonte"
+                                : "Instalar " + downloads + " mods e aplicar"),
                         button -> ClientSyncController.prepare(request, manifest, plan))
-                .bounds(width / 2 - 100, y, 145, 20).build();
+                .bounds(width / 2 - 125, y, 190, 20).build();
         apply.active = !plan.hasBlockedActions();
         addRenderableWidget(apply);
         addRenderableWidget(Button.builder(Component.literal("Cancelar"), button -> minecraft.setScreen(request.parent()))
-                .bounds(width / 2 + 49, y, 70, 20).build());
+                .bounds(width / 2 + 69, y, 70, 20).build());
 
         int pageSize = pageSize();
         int pages = Math.max(1, (rows.size() + pageSize - 1) / pageSize);
@@ -95,14 +97,25 @@ public final class SyncReviewScreen extends Screen {
         List<String> result = new ArrayList<>();
         for (PlanAction action : plan.actions()) {
             String row = switch (action.type()) {
-                case INSTALL -> "+ INSTALAR  " + action.displayName() + "  " + action.targetVersion();
+                case INSTALL -> "+ INSTALAR  " + action.displayName() + "  " + action.targetVersion()
+                        + "  [" + source(action) + ']';
                 case UPDATE -> "~ ATUALIZAR " + action.displayName() + "  "
-                        + action.currentVersion() + " -> " + action.targetVersion();
+                        + action.currentVersion() + " -> " + action.targetVersion()
+                        + "  [" + source(action) + ']';
                 case QUARANTINE -> "- QUARENTENA " + action.displayName() + "  " + action.currentVersion();
-                case BLOCKED -> "! SEM DOWNLOAD " + action.displayName() + "  " + action.targetVersion();
+                case BLOCKED -> "! SEM FONTE " + action.displayName() + "  " + action.targetVersion()
+                        + " — " + action.reason();
             };
             result.add(row);
         }
         return List.copyOf(result);
+    }
+
+    private static String source(PlanAction action) {
+        return action.target() == null ? "local" : switch (action.target().platform) {
+            case MODRINTH -> "Modrinth";
+            case CURSEFORGE -> "CurseForge";
+            case NONE -> "sem fonte";
+        };
     }
 }

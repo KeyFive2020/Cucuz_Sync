@@ -37,7 +37,8 @@ public final class SyncPlanner {
             InstalledMod current = installed.get(normalize(target.modId));
             if (current == null && target.required) {
                 actions.add(targetAction(PlanAction.Type.INSTALL, target, null));
-            } else if (current != null && !target.version.equals(current.version())) {
+            } else if (current != null && (!target.version.equals(current.version())
+                    || !matchesExpectedHash(target, current))) {
                 actions.add(targetAction(PlanAction.Type.UPDATE, target, current));
             }
         }
@@ -76,7 +77,7 @@ public final class SyncPlanner {
         };
         PlanAction.Type type = downloadable ? requested : PlanAction.Type.BLOCKED;
         String reason = downloadable
-                ? (requested == PlanAction.Type.INSTALL ? "Mod obrigatório ausente." : "Versão diferente da exigida pelo servidor.")
+                ? (requested == PlanAction.Type.INSTALL ? "Mod obrigatório ausente." : "Versão ou arquivo diferente do exigido pelo servidor.")
                 : "O administrador ainda não informou uma fonte de download verificável.";
         return new PlanAction(
                 type,
@@ -92,6 +93,16 @@ public final class SyncPlanner {
 
     private static boolean notBlank(String value) {
         return value != null && !value.isBlank();
+    }
+
+    private static boolean matchesExpectedHash(ManifestMod target, InstalledMod current) {
+        if (notBlank(target.sha512)) {
+            return target.sha512.equalsIgnoreCase(current.sha512());
+        }
+        if (notBlank(target.sha1)) {
+            return target.sha1.equalsIgnoreCase(current.sha1());
+        }
+        return true;
     }
 
     private static String normalize(String value) {

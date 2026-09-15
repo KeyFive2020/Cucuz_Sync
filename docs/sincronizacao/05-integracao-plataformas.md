@@ -21,7 +21,7 @@ A [resposta de versão por hash](https://docs.modrinth.com/api/operations/versio
 
 ### Download
 
-- Selecionar o arquivo marcado como `primary`; se nenhum for primário, tratar o primeiro somente conforme a regra documentada pela API.
+- Selecionar o membro de `files[]` cujo SHA-1 ou SHA-512 seja exatamente o mesmo do JAR identificado pelo servidor; nunca escolher apenas pelo marcador `primary`.
 - Aceitar apenas URL retornada para o arquivo exato do manifesto.
 - Restringir HTTPS aos hosts oficiais esperados e validar redirecionamentos.
 - Verificar tamanho e SHA-512 após baixar.
