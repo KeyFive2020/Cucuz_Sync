@@ -93,8 +93,10 @@ public final class ServerManifestRepository {
                 refreshed.mods.size(), resolved, unresolved);
         if (unresolved > 0) {
             if (curseForgeApiKey == null || curseForgeApiKey.isBlank()) {
-                LOGGER.warn("{} mods não foram encontrados na Modrinth. Configure CURSEFORGE_API_KEY para procurar no CurseForge.",
-                        unresolved);
+                LOGGER.warn("{} mods não foram encontrados na Modrinth. Para procurar no CurseForge, defina "
+                                + "CURSEFORGE_API_KEY/CF_API_KEY ou preencha curseForgeApiKey em {}. "
+                                + "A configuração será relida automaticamente em até 5 minutos.",
+                        unresolved, DIRECTORY.resolve("server-settings.json").toAbsolutePath());
             } else {
                 LOGGER.warn("{} mods não foram encontrados pelo hash na Modrinth nem no CurseForge.", unresolved);
             }

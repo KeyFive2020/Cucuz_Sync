@@ -10,7 +10,7 @@ import java.nio.file.Path;
 
 final class ServerSettings {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    String note = "A chave CurseForge é opcional. Modrinth funciona sem chave; CurseForge é usado como fallback.";
+    String note = "Modrinth funciona sem chave. Para procurar também no CurseForge, cole a API key em curseForgeApiKey; a alteração é relida automaticamente em até 5 minutos.";
     String curseForgeApiKey = "";
 
     static ServerSettings loadOrCreate(Path directory) throws IOException {
@@ -25,11 +25,19 @@ final class ServerSettings {
     }
 
     String effectiveCurseForgeApiKey() {
-        String systemProperty = System.getProperty("cuscuzSync.curseForgeApiKey", "");
-        if (!systemProperty.isBlank()) {
+        String systemProperty = normalized(System.getProperty("cuscuzSync.curseForgeApiKey"));
+        if (!systemProperty.isEmpty()) {
             return systemProperty;
         }
-        String environment = System.getenv("CURSEFORGE_API_KEY");
-        return environment == null || environment.isBlank() ? curseForgeApiKey : environment;
+        String environment = normalized(System.getenv("CURSEFORGE_API_KEY"));
+        if (!environment.isEmpty()) {
+            return environment;
+        }
+        String shortEnvironment = normalized(System.getenv("CF_API_KEY"));
+        return shortEnvironment.isEmpty() ? normalized(curseForgeApiKey) : shortEnvironment;
+    }
+
+    static String normalized(String value) {
+        return value == null ? "" : value.trim();
     }
 }

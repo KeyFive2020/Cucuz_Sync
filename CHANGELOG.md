@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.3 - 2026-09-14
+
+- Aceita `CF_API_KEY` como nome alternativo para a chave do CurseForge.
+- Remove espaços e quebras de linha copiados junto com a chave.
+- Informa no log o caminho exato do arquivo de configuração e quando ocorrerá nova tentativa.
+- Altera os lançamentos novos para licença proprietária com todos os direitos reservados.
+
 ## 0.3.2 - 2026-09-14
 
 - Move mods sem fonte para uma tela separada e vermelha.

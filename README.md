@@ -55,8 +55,8 @@ Os JARs de todas as linhas serao copiados para `dist/` ao final de uma compilaca
 - Mod ID: `cuscuz_sync`
 - Nome: `Cuscuz Sync`
 - Código novo: `br.com.cuscuz.sync`
-- Versao Forge 1.20.1: `0.3.2`
-- Licenca: MIT
+- Versao Forge 1.20.1: `0.3.3`
+- Licenca: proprietária, todos os direitos reservados
 
 Use `scripts/set-mod-properties.ps1` para alterar os metadados de todas as linhas de uma vez. A troca do pacote Java exige tambem mover/renomear os arquivos fonte.
 
@@ -77,6 +77,12 @@ O cliente permite instalar os arquivos encontrados mesmo quando parte da lista c
 
 Mods sem fonte aparecem em uma tela separada, em vermelho. O cliente pode salvar uma lista UTF-8 em `.cuscuz-sync/reports` enquanto prepara os outros downloads.
 
-O servidor reconstrói o manifesto a cada cinco minutos. Ele identifica cada JAR ativo pelo SHA-1 na Modrinth e usa o fingerprint oficial do CurseForge como fallback. Modrinth não exige chave. Para mods exclusivos do CurseForge, configure `CURSEFORGE_API_KEY`, `-DcuscuzSync.curseForgeApiKey=...` ou o campo privado em `config/cuscuz-sync/server-settings.json`.
+O servidor reconstrói o manifesto a cada cinco minutos. Ele identifica cada JAR ativo pelo SHA-1 na Modrinth e usa o fingerprint oficial do CurseForge como fallback. Modrinth não exige chave. Para mods exclusivos do CurseForge, configure `CURSEFORGE_API_KEY`, `CF_API_KEY`, `-DcuscuzSync.curseForgeApiKey=...` ou cole a chave no campo privado `curseForgeApiKey` de `config/cuscuz-sync/server-settings.json`. Espaços acidentais são removidos e o arquivo é relido automaticamente em até cinco minutos.
+
+## Licença
+
+O Cuscuz Sync 0.3.3 e posteriores permitem baixar e executar versões compiladas oficiais para uso pessoal ou em servidores autorizados. O código-fonte não pode ser copiado, modificado, republicado, redistribuído ou usado em trabalhos derivados sem autorização escrita. Consulte [`LICENSE`](LICENSE).
+
+Versões que já foram publicadas sob MIT continuam cobertas pela licença recebida na época; uma troca posterior não revoga permissões já concedidas.
 
 Como o Forge não carrega JARs durante a execução, alterações na pasta `mods` exigem reiniciar o servidor. Depois disso, a lista ativa é reconstruída e continua sendo atualizada a cada cinco minutos.

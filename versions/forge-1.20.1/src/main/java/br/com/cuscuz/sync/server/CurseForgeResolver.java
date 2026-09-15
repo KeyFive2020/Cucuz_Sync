@@ -37,7 +37,7 @@ final class CurseForgeResolver {
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json")
                 .header("x-api-key", apiKey)
-                .header("User-Agent", "CuscuzSyncServer/0.3.2")
+                .header("User-Agent", "CuscuzSyncServer/0.3.3")
                 .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
                 .build();
         HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());

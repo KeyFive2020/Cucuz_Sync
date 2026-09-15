@@ -83,4 +83,10 @@ class PlatformResolverTest {
         assertEquals(ManifestMod.Environment.SERVER, target.environment);
         assertEquals(ManifestMod.Platform.MODRINTH, target.platform);
     }
+
+    @Test
+    void normalizesCurseForgeApiKeysCopiedFromAControlPanel() {
+        assertEquals("secret-key", ServerSettings.normalized("  secret-key\r\n"));
+        assertEquals("", ServerSettings.normalized(null));
+    }
 }

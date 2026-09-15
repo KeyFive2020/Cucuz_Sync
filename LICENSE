@@ -1,22 +1,49 @@
-MIT License
+CUSCUZ SYNC PROPRIETARY LICENSE 1.0
 
-Copyright (c) 2026 Equipe Cuscuz
+Copyright (c) 2026 Equipe Cuscuz. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. Permitted use
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Permission is granted to download and run unmodified, official compiled
+releases of Cuscuz Sync for personal, non-commercial use, including use on a
+Minecraft client or an authorized Minecraft server.
+
+2. Restrictions
+
+Except with prior written permission from the copyright holder, you may not:
+
+- copy or redistribute the source code or compiled releases;
+- modify, adapt, merge, translate, or create derivative works from the software;
+- publish, sublicense, sell, rent, monetize, or otherwise make the software
+  available to third parties;
+- remove or alter copyright, license, authorship, or attribution notices; or
+- use the Cuscuz Sync name, branding, or identity to imply endorsement.
+
+Permissions required by applicable law and rights expressly granted by the
+terms of an authorized distribution platform are not restricted by this
+license.
+
+3. Third-party software
+
+This license covers only original Cuscuz Sync code and assets. Minecraft,
+Forge, NeoForge, libraries, and other third-party components remain governed
+by their respective licenses and owners.
+
+4. Disclaimer
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. TO THE MAXIMUM EXTENT PERMITTED
+BY LAW, THE COPYRIGHT HOLDER SHALL NOT BE LIABLE FOR ANY CLAIM, DAMAGES, OR
+OTHER LIABILITY ARISING FROM THE SOFTWARE OR ITS USE.
+
+5. Scope and prior versions
+
+This license applies to Cuscuz Sync version 0.3.3 and later unless a release
+explicitly states different terms. Versions already distributed under the MIT
+License remain available to their recipients under the permissions granted at
+the time of distribution.
+
+For commercial, redistribution, modification, or derivative-work permission,
+contact the copyright holder through the official project repository.
 
