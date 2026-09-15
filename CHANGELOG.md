@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2 - 2026-09-14
+
+- Move mods sem fonte para uma tela separada e vermelha.
+- Exporta relatório `.txt` pela própria tela ou junto com os downloads disponíveis.
+- Salva o relatório em `.cuscuz-sync/reports` dentro da instância.
+
 ## 0.3.1 - 2026-09-14
 
 - Permite instalar mods encontrados mesmo quando outros continuam sem fonte.

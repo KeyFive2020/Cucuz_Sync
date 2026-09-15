@@ -65,7 +65,7 @@ public final class ManifestClient {
         HttpRequest request = HttpRequest.newBuilder(endpoint)
                 .timeout(Duration.ofSeconds(15))
                 .header("Accept", "application/json")
-                .header("User-Agent", "CuscuzSync/0.3.1 (Minecraft 1.20.1; Forge)")
+                .header("User-Agent", "CuscuzSync/0.3.2 (Minecraft 1.20.1; Forge)")
                 .GET()
                 .build();
         HttpResponse<InputStream> response = HTTP.send(request, HttpResponse.BodyHandlers.ofInputStream());

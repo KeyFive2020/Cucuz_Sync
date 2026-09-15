@@ -5,16 +5,20 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.nio.file.Path;
+
 public final class SyncPreparedScreen extends Screen {
     private final Screen parent;
     private final int operationCount;
     private final int blockedCount;
+    private final Path blockedReport;
 
-    public SyncPreparedScreen(Screen parent, int operationCount, int blockedCount) {
+    public SyncPreparedScreen(Screen parent, int operationCount, int blockedCount, Path blockedReport) {
         super(Component.literal("Cuscuz Sync: alterações preparadas"));
         this.parent = parent;
         this.operationCount = operationCount;
         this.blockedCount = blockedCount;
+        this.blockedReport = blockedReport;
     }
 
     @Override
@@ -35,15 +39,20 @@ public final class SyncPreparedScreen extends Screen {
                 width / 2, height / 2 - 18, 0xFFFFFF);
         if (blockedCount > 0) {
             graphics.drawCenteredString(font,
-                    Component.literal(blockedCount + " mods continuam sem fonte; configure o CurseForge no servidor."),
+                    Component.literal(blockedCount + " mods continuam sem fonte."),
                     width / 2, height / 2 - 4, 0xFFAA55);
+            if (blockedReport != null) {
+                graphics.drawCenteredString(font,
+                        Component.literal("Lista salva em .cuscuz-sync/reports/" + blockedReport.getFileName()),
+                        width / 2, height / 2 + 8, 0xFFAA55);
+            }
         }
         graphics.drawCenteredString(font,
                 Component.literal("Ao fechar, o helper moverá extras para a quarentena e instalará os JARs."),
-                width / 2, height / 2 + 12, 0xD0D0D0);
+                width / 2, height / 2 + 22, 0xD0D0D0);
         graphics.drawCenteredString(font,
                 Component.literal("Depois, abra o Minecraft novamente e conecte ao servidor."),
-                width / 2, height / 2 + 26, 0xD0D0D0);
+                width / 2, height / 2 + 36, 0xD0D0D0);
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 }

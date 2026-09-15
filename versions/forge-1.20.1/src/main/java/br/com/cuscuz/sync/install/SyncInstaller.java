@@ -32,6 +32,12 @@ public final class SyncInstaller {
 
     public static PreparedPlan prepare(Path gameDirectory, SyncManifest manifest, SyncPlan plan)
             throws IOException, InterruptedException {
+        return prepare(gameDirectory, manifest, plan, false);
+    }
+
+    public static PreparedPlan prepare(Path gameDirectory, SyncManifest manifest, SyncPlan plan,
+                                       boolean exportMissingReport)
+            throws IOException, InterruptedException {
         List<PlanAction> actionable = plan.actionableActions();
         if (actionable.isEmpty()) {
             throw new IOException("Nenhuma alteração possui fonte de download verificável.");
@@ -42,6 +48,8 @@ public final class SyncInstaller {
         Path staging = syncRoot.resolve("staging").resolve(manifest.profileId + '-' + stamp).toAbsolutePath().normalize();
         Path quarantine = syncRoot.resolve("quarantine").resolve(stamp).toAbsolutePath().normalize();
         Path modsDirectory = gameRoot.resolve("mods").toAbsolutePath().normalize();
+        Path blockedReport = exportMissingReport && plan.hasBlockedActions()
+                ? exportBlockedReport(gameRoot, manifest, plan) : null;
         Files.createDirectories(staging);
         Files.createDirectories(quarantine);
 
@@ -86,7 +94,61 @@ public final class SyncInstaller {
         Path temporary = syncRoot.resolve("pending-plan.json.tmp");
         Files.writeString(temporary, GSON.toJson(pendingPlan), StandardCharsets.UTF_8);
         Files.move(temporary, pending, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        return new PreparedPlan(pending, script, operations.size(), (int) plan.count(PlanAction.Type.BLOCKED));
+        return new PreparedPlan(pending, script, operations.size(),
+                (int) plan.count(PlanAction.Type.BLOCKED), blockedReport);
+    }
+
+    public static Path exportBlockedReport(Path gameDirectory, SyncManifest manifest, SyncPlan plan)
+            throws IOException {
+        List<PlanAction> blocked = plan.actions().stream()
+                .filter(action -> action.type() == PlanAction.Type.BLOCKED)
+                .toList();
+        if (blocked.isEmpty()) {
+            throw new IOException("Não existem mods sem fonte para exportar.");
+        }
+
+        Path gameRoot = gameDirectory.toAbsolutePath().normalize();
+        Path reports = gameRoot.resolve(".cuscuz-sync").resolve("reports");
+        Files.createDirectories(reports);
+        String profile = safeFilePart(manifest.profileId);
+        Path target = reports.resolve("mods-sem-fonte-" + profile + ".txt");
+        Path temporary = reports.resolve(target.getFileName() + ".tmp");
+
+        String newline = System.lineSeparator();
+        StringBuilder text = new StringBuilder()
+                .append("Cuscuz Sync - Mods sem fonte").append(newline)
+                .append("Servidor: ").append(safeText(manifest.name)).append(newline)
+                .append("Perfil: ").append(safeText(manifest.profileId)).append(newline)
+                .append("Manifesto: ").append(safeText(manifest.manifestVersion)).append(newline)
+                .append("Gerado em: ").append(Instant.now()).append(newline)
+                .append("Total: ").append(blocked.size()).append(newline).append(newline);
+        for (int index = 0; index < blocked.size(); index++) {
+            PlanAction action = blocked.get(index);
+            text.append(index + 1).append(". ").append(action.displayName()).append(newline)
+                    .append("   Mod ID: ").append(action.modId()).append(newline)
+                    .append("   Versão: ").append(action.targetVersion()).append(newline)
+                    .append("   Motivo: ").append(action.reason()).append(newline).append(newline);
+        }
+
+        Files.writeString(temporary, text, StandardCharsets.UTF_8);
+        try {
+            Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException atomicMoveUnsupported) {
+            Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
+        }
+        return target;
+    }
+
+    private static String safeFilePart(String value) {
+        String safe = safeText(value).replaceAll("[^A-Za-z0-9._-]", "_");
+        if (safe.isBlank()) {
+            return "servidor";
+        }
+        return safe.substring(0, Math.min(safe.length(), 48));
+    }
+
+    private static String safeText(String value) {
+        return value == null ? "" : value.replace('\r', ' ').replace('\n', ' ');
     }
 
     private static Path requireRegularModFile(Path source, Path modsDirectory) throws IOException {
@@ -122,7 +184,8 @@ public final class SyncInstaller {
         }
     }
 
-    public record PreparedPlan(Path pendingPlan, Path helperScript, int operationCount, int blockedCount) {
+    public record PreparedPlan(Path pendingPlan, Path helperScript, int operationCount,
+                               int blockedCount, Path blockedReport) {
     }
 
     private record Operation(String kind, String source, String target, String modId) {

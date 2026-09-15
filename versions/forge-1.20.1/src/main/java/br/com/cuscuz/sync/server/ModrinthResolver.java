@@ -27,7 +27,7 @@ final class ModrinthResolver {
         HttpRequest request = HttpRequest.newBuilder(uri)
                 .timeout(Duration.ofSeconds(20))
                 .header("Accept", "application/json")
-                .header("User-Agent", "CuscuzSyncServer/0.3.1 (Minecraft 1.20.1; Forge)")
+                .header("User-Agent", "CuscuzSyncServer/0.3.2 (Minecraft 1.20.1; Forge)")
                 .GET()
                 .build();
         HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());
@@ -110,7 +110,7 @@ final class ModrinthResolver {
         HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.modrinth.com/v2/project/" + projectId))
                 .timeout(Duration.ofSeconds(20))
                 .header("Accept", "application/json")
-                .header("User-Agent", "CuscuzSyncServer/0.3.1 (Minecraft 1.20.1; Forge)")
+                .header("User-Agent", "CuscuzSyncServer/0.3.2 (Minecraft 1.20.1; Forge)")
                 .GET()
                 .build();
         HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());

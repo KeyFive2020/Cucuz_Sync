@@ -35,15 +35,21 @@ public final class SyncReviewScreen extends Screen {
         long blocked = plan.count(PlanAction.Type.BLOCKED);
         long actionable = plan.actionableCount();
         String applyLabel = blocked > 0 && actionable > 0
-                ? "Instalar " + downloads + " disponíveis (" + blocked + " sem fonte)"
+                ? (downloads > 0 ? "Instalar " + downloads + " e salvar lista .txt"
+                : "Aplicar alterações e salvar lista .txt")
                 : blocked > 0 ? blocked + " mods sem fonte" : "Instalar " + downloads + " mods e aplicar";
         Button apply = Button.builder(Component.literal(applyLabel),
-                        button -> ClientSyncController.prepare(request, manifest, plan))
+                        button -> ClientSyncController.prepare(request, manifest, plan, blocked > 0))
                 .bounds(width / 2 - 170, y, 250, 20).build();
         apply.active = actionable > 0;
         addRenderableWidget(apply);
         addRenderableWidget(Button.builder(Component.literal("Cancelar"), button -> minecraft.setScreen(request.parent()))
                 .bounds(width / 2 + 84, y, 80, 20).build());
+        if (blocked > 0) {
+            addRenderableWidget(Button.builder(Component.literal("Ver " + blocked + " sem fonte"),
+                            button -> minecraft.setScreen(new MissingSourcesScreen(this, request, manifest, plan)))
+                    .bounds(width / 2 - 75, y - 24, 150, 20).build());
+        }
 
         int pageSize = pageSize();
         int pages = Math.max(1, (rows.size() + pageSize - 1) / pageSize);
@@ -93,12 +99,15 @@ public final class SyncReviewScreen extends Screen {
     }
 
     private int pageSize() {
-        return Math.max(4, (height - 116) / 12);
+        return Math.max(4, (height - (plan.hasBlockedActions() ? 140 : 116)) / 12);
     }
 
     private static List<String> buildRows(SyncPlan plan) {
         List<String> result = new ArrayList<>();
         for (PlanAction action : plan.actions()) {
+            if (action.type() == PlanAction.Type.BLOCKED) {
+                continue;
+            }
             String row = switch (action.type()) {
                 case INSTALL -> "+ INSTALAR  " + action.displayName() + "  " + action.targetVersion()
                         + "  [" + source(action) + ']';
@@ -106,8 +115,7 @@ public final class SyncReviewScreen extends Screen {
                         + action.currentVersion() + " -> " + action.targetVersion()
                         + "  [" + source(action) + ']';
                 case QUARANTINE -> "- QUARENTENA " + action.displayName() + "  " + action.currentVersion();
-                case BLOCKED -> "! SEM FONTE " + action.displayName() + "  " + action.targetVersion()
-                        + " — " + action.reason();
+                case BLOCKED -> throw new IllegalStateException("Ações bloqueadas usam a tela separada.");
             };
             result.add(row);
         }
