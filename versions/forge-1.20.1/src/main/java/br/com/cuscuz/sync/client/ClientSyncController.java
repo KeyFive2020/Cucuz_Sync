@@ -71,7 +71,8 @@ public final class ClientSyncController {
                 minecraft.setScreen(new SyncErrorScreen(request, readable(failure)));
                 return;
             }
-            minecraft.setScreen(new SyncPreparedScreen(request.parent(), prepared.operationCount()));
+            minecraft.setScreen(new SyncPreparedScreen(
+                    request.parent(), prepared.operationCount(), prepared.blockedCount()));
         }));
     }
 

@@ -55,7 +55,7 @@ Os JARs de todas as linhas serao copiados para `dist/` ao final de uma compilaca
 - Mod ID: `cuscuz_sync`
 - Nome: `Cuscuz Sync`
 - Código novo: `br.com.cuscuz.sync`
-- Versao Forge 1.20.1: `0.3.0`
+- Versao Forge 1.20.1: `0.3.1`
 - Licenca: MIT
 
 Use `scripts/set-mod-properties.ps1` para alterar os metadados de todas as linhas de uma vez. A troca do pacote Java exige tambem mover/renomear os arquivos fonte.
@@ -72,6 +72,8 @@ Use `scripts/set-mod-properties.ps1` para alterar os metadados de todas as linha
 O plano completo está em [`docs/sincronizacao`](docs/sincronizacao/README.md) e o estado do primeiro marco executável está em [`09-implementacao-forge-1.20.1.md`](docs/sincronizacao/09-implementacao-forge-1.20.1.md).
 
 A versão 1.20.1 agora gera dois arquivos: `*-client.jar` para a instância do jogador e `*-server.jar` para o servidor dedicado. Não instale os dois no mesmo lado.
+
+O cliente permite instalar os arquivos encontrados mesmo quando parte da lista continua sem fonte. Esses arquivos pendentes permanecem bloqueados até o servidor conseguir identificá-los.
 
 O servidor reconstrói o manifesto a cada cinco minutos. Ele identifica cada JAR ativo pelo SHA-1 na Modrinth e usa o fingerprint oficial do CurseForge como fallback. Modrinth não exige chave. Para mods exclusivos do CurseForge, configure `CURSEFORGE_API_KEY`, `-DcuscuzSync.curseForgeApiKey=...` ou o campo privado em `config/cuscuz-sync/server-settings.json`.
 

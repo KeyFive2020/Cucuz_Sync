@@ -15,6 +15,14 @@ public record SyncPlan(List<PlanAction> actions) {
         return actions.stream().anyMatch(action -> action.type() == PlanAction.Type.BLOCKED);
     }
 
+    public List<PlanAction> actionableActions() {
+        return actions.stream().filter(action -> action.type() != PlanAction.Type.BLOCKED).toList();
+    }
+
+    public long actionableCount() {
+        return actions.stream().filter(action -> action.type() != PlanAction.Type.BLOCKED).count();
+    }
+
     public long count(PlanAction.Type type) {
         return actions.stream().filter(action -> action.type() == type).count();
     }

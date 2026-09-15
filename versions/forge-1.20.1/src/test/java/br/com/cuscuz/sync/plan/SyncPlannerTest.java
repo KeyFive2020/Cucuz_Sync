@@ -64,6 +64,24 @@ class SyncPlannerTest {
         assertEquals(1, plan.count(PlanAction.Type.UPDATE));
     }
 
+    @Test
+    void keepsDownloadableActionsAvailableWhenAnotherModHasNoSource() {
+        SyncManifest manifest = new SyncManifest();
+        manifest.mods.add(modrinth("available", "1.0.0"));
+        ManifestMod blocked = new ManifestMod();
+        blocked.modId = "blocked";
+        blocked.name = "blocked";
+        blocked.version = "1.0.0";
+        manifest.mods.add(blocked);
+
+        var plan = SyncPlanner.compare(manifest, List.of());
+
+        assertEquals(1, plan.count(PlanAction.Type.INSTALL));
+        assertEquals(1, plan.count(PlanAction.Type.BLOCKED));
+        assertEquals(1, plan.actionableCount());
+        assertEquals(1, plan.actionableActions().size());
+    }
+
     private static ManifestMod modrinth(String id, String version) {
         ManifestMod mod = new ManifestMod();
         mod.modId = id;

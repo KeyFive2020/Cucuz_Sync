@@ -32,15 +32,18 @@ public final class SyncReviewScreen extends Screen {
     protected void init() {
         int y = height - 28;
         long downloads = plan.count(PlanAction.Type.INSTALL) + plan.count(PlanAction.Type.UPDATE);
-        Button apply = Button.builder(Component.literal(plan.hasBlockedActions()
-                                ? plan.count(PlanAction.Type.BLOCKED) + " mods sem fonte"
-                                : "Instalar " + downloads + " mods e aplicar"),
+        long blocked = plan.count(PlanAction.Type.BLOCKED);
+        long actionable = plan.actionableCount();
+        String applyLabel = blocked > 0 && actionable > 0
+                ? "Instalar " + downloads + " disponíveis (" + blocked + " sem fonte)"
+                : blocked > 0 ? blocked + " mods sem fonte" : "Instalar " + downloads + " mods e aplicar";
+        Button apply = Button.builder(Component.literal(applyLabel),
                         button -> ClientSyncController.prepare(request, manifest, plan))
-                .bounds(width / 2 - 125, y, 190, 20).build();
-        apply.active = !plan.hasBlockedActions();
+                .bounds(width / 2 - 170, y, 250, 20).build();
+        apply.active = actionable > 0;
         addRenderableWidget(apply);
         addRenderableWidget(Button.builder(Component.literal("Cancelar"), button -> minecraft.setScreen(request.parent()))
-                .bounds(width / 2 + 69, y, 70, 20).build());
+                .bounds(width / 2 + 84, y, 80, 20).build());
 
         int pageSize = pageSize();
         int pages = Math.max(1, (rows.size() + pageSize - 1) / pageSize);

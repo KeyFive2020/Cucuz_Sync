@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 - 2026-09-14
+
+- Permite instalar mods encontrados mesmo quando outros continuam sem fonte.
+- Mostra no cliente quantos mods ainda exigem configuração do CurseForge no servidor.
+- Registra aviso claro quando falta `CURSEFORGE_API_KEY`.
+
 ## 0.3.0 - 2026-09-14
 
 - Separa os artefatos Forge 1.20.1 em JAR de cliente e JAR de servidor.

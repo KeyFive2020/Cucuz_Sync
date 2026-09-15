@@ -52,7 +52,7 @@ final class DownloadService {
         HttpRequest request = HttpRequest.newBuilder(artifact.uri())
                 .timeout(Duration.ofMinutes(3))
                 .header("Accept", "application/java-archive, application/octet-stream")
-                .header("User-Agent", "CuscuzSync/0.3.0 (Minecraft 1.20.1; Forge)")
+                .header("User-Agent", "CuscuzSync/0.3.1 (Minecraft 1.20.1; Forge)")
                 .GET()
                 .build();
         HttpResponse<InputStream> response = HTTP.send(request, HttpResponse.BodyHandlers.ofInputStream());
@@ -94,7 +94,7 @@ final class DownloadService {
         HttpRequest request = HttpRequest.newBuilder(uri)
                 .timeout(Duration.ofSeconds(20))
                 .header("Accept", "application/json")
-                .header("User-Agent", "CuscuzSync/0.3.0 (Minecraft 1.20.1; Forge)")
+                .header("User-Agent", "CuscuzSync/0.3.1 (Minecraft 1.20.1; Forge)")
                 .GET()
                 .build();
         HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());

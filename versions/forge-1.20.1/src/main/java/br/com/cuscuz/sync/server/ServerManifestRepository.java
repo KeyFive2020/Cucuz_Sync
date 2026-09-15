@@ -91,6 +91,14 @@ public final class ServerManifestRepository {
         writeAtomically(bytes);
         LOGGER.info("Manifesto atualizado: {} mods, {} com download, {} sem fonte para cliente.",
                 refreshed.mods.size(), resolved, unresolved);
+        if (unresolved > 0) {
+            if (curseForgeApiKey == null || curseForgeApiKey.isBlank()) {
+                LOGGER.warn("{} mods não foram encontrados na Modrinth. Configure CURSEFORGE_API_KEY para procurar no CurseForge.",
+                        unresolved);
+            } else {
+                LOGGER.warn("{} mods não foram encontrados pelo hash na Modrinth nem no CurseForge.", unresolved);
+            }
+        }
         return bytes;
     }
 

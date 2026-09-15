@@ -78,7 +78,7 @@ public final class SyncPlanner {
         PlanAction.Type type = downloadable ? requested : PlanAction.Type.BLOCKED;
         String reason = downloadable
                 ? (requested == PlanAction.Type.INSTALL ? "Mod obrigatório ausente." : "Versão ou arquivo diferente do exigido pelo servidor.")
-                : "O administrador ainda não informou uma fonte de download verificável.";
+                : "Não encontrado na Modrinth/CurseForge. Verifique a chave CurseForge no servidor.";
         return new PlanAction(
                 type,
                 target.modId,

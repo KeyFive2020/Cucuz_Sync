@@ -32,8 +32,9 @@ public final class SyncInstaller {
 
     public static PreparedPlan prepare(Path gameDirectory, SyncManifest manifest, SyncPlan plan)
             throws IOException, InterruptedException {
-        if (plan.hasBlockedActions()) {
-            throw new IOException("Há mods sem uma fonte de download verificável.");
+        List<PlanAction> actionable = plan.actionableActions();
+        if (actionable.isEmpty()) {
+            throw new IOException("Nenhuma alteração possui fonte de download verificável.");
         }
         Path gameRoot = gameDirectory.toAbsolutePath().normalize();
         Path syncRoot = gameRoot.resolve(".cuscuz-sync");
@@ -48,7 +49,7 @@ public final class SyncInstaller {
         Set<Path> quarantinedSources = new HashSet<>();
         Map<Path, String> installTargets = new HashMap<>();
         Map<String, Path> downloadedArtifacts = new HashMap<>();
-        for (PlanAction action : plan.actions()) {
+        for (PlanAction action : actionable) {
             if (action.type() == PlanAction.Type.QUARANTINE || action.type() == PlanAction.Type.UPDATE) {
                 Path source = requireRegularModFile(action.installed().filePath(), modsDirectory);
                 if (quarantinedSources.add(source)) {
@@ -85,7 +86,7 @@ public final class SyncInstaller {
         Path temporary = syncRoot.resolve("pending-plan.json.tmp");
         Files.writeString(temporary, GSON.toJson(pendingPlan), StandardCharsets.UTF_8);
         Files.move(temporary, pending, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        return new PreparedPlan(pending, script, operations.size());
+        return new PreparedPlan(pending, script, operations.size(), (int) plan.count(PlanAction.Type.BLOCKED));
     }
 
     private static Path requireRegularModFile(Path source, Path modsDirectory) throws IOException {
@@ -121,7 +122,7 @@ public final class SyncInstaller {
         }
     }
 
-    public record PreparedPlan(Path pendingPlan, Path helperScript, int operationCount) {
+    public record PreparedPlan(Path pendingPlan, Path helperScript, int operationCount, int blockedCount) {
     }
 
     private record Operation(String kind, String source, String target, String modId) {

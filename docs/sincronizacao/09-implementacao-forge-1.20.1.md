@@ -14,6 +14,7 @@ Ele já realiza:
 - comparação entre cliente e servidor;
 - tela paginada mostrando todos os mods que seriam instalados, atualizados ou movidos;
 - consentimento explícito antes de qualquer mudança;
+- instalação parcial segura dos arquivos encontrados, sem ocultar os que continuam sem fonte;
 - descoberta do JAR exato pela API pública da Modrinth usando SHA-1;
 - fallback de descoberta no CurseForge usando fingerprint Murmur2 quando uma chave de API está configurada;
 - manifesto reconstruído e republicado a cada cinco minutos;
